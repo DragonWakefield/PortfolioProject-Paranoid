@@ -23,20 +23,45 @@ public class Encounter : MonoBehaviour
 
     private bool _activated;
     private float initialAngle;
+    private bool startEncounter;
     
     private void Start(){
         _activated = false;
-        movSpeed = 2f;
+        movSpeed = 0.5f;
         playerCentre = GameObject.FindGameObjectWithTag("EyeTracker");
         model = transform.GetChild(1).GetChild(0).gameObject;
         modelRenderer = model.GetComponent<Renderer>();
         initialAngle = 0;
+        startEncounter = false;
+        
     }
 
     private void Update(){
+        Debug.DrawRay(model.transform.position, model.transform.TransformDirection(Vector3.forward) * 10, Color.green);
+        
         if(_activated){
+
+            float angle = GetAngle();
+            Debug.Log(angle);
+            if (angle > 40f){
+                startEncounter = true;
+                modelRenderer.material = tempMaterial2; // Testing Primatives
+            }
+        }
+
+        if (startEncounter){
             TrackAndFade();
         }
+    }
+
+    private float GetAngle(){
+        _distanceToPlayer = player.transform.position - model.transform.position;
+
+        Vector3 playerToCentre = playerCentre.transform.position - player.transform.position ;
+
+        float angle = Vector3.Angle(_distanceToPlayer, playerToCentre);    
+
+        return angle;
     }
 
     private void TrackAndFade(){
@@ -57,13 +82,13 @@ public class Encounter : MonoBehaviour
         }
         else{
             float percentage = angle / initialAngle;
-            Debug.Log(percentage);
+            //Debug.Log(percentage);
             var modelColor = modelRenderer.material.color;
             modelColor.a = percentage;
             modelRenderer.material.color = modelColor;
 
             if (percentage < 0.20f){
-                StartCoroutine(FadeOut(1f));
+                StartCoroutine(FadeOut(4f));
             }
         }
 
@@ -73,19 +98,24 @@ public class Encounter : MonoBehaviour
     public void ActivateEncounter(){
         Debug.Log("Activated");
         _activated = true;
-        modelRenderer.material = tempMaterial2;
+        //modelRenderer.material = tempMaterial2; // For Testing Primatives
     }
 
     private IEnumerator FadeOut(float fadeTime){
         Vector3 startPosition = model.transform.position;
+        Vector3 endPosition = model.transform.position - model.transform.forward * 5f;
         float elaspedTime = 0;
 
         while(elaspedTime < fadeTime){
-            model.transform.position -= Vector3.forward * Time.deltaTime * movSpeed;
+
+            model.transform.position = Vector3.Lerp(startPosition, endPosition, (elaspedTime/ fadeTime));
+
+            //model.transform.position -= model.transform.forward * Time.deltaTime * movSpeed;
             elaspedTime += Time.deltaTime;
+            yield return null;
         }
 
         Destroy(gameObject);
-        yield return null;
+        
     }
 }
