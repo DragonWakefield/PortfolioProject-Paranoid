@@ -67,14 +67,7 @@ public class Encounter : MonoBehaviour
     private void TrackAndFade(){
 
         /* Track */
-        Debug.DrawLine(model.transform.position, player.transform.position, Color.green);
-        _distanceToPlayer = player.transform.position - model.transform.position;
-
-        Vector3 playerToCentre = playerCentre.transform.position - player.transform.position ;
-
-        float angle = Vector3.Angle(_distanceToPlayer, playerToCentre);
-
-        //Debug.Log(angle);
+        float angle = GetAngle();
 
         /* Fade */
         if (initialAngle == 0){
@@ -82,7 +75,7 @@ public class Encounter : MonoBehaviour
         }
         else{
             float percentage = angle / initialAngle;
-            //Debug.Log(percentage);
+
             var modelColor = modelRenderer.material.color;
             modelColor.a = percentage;
             modelRenderer.material.color = modelColor;
@@ -98,7 +91,6 @@ public class Encounter : MonoBehaviour
     public void ActivateEncounter(){
         Debug.Log("Activated");
         _activated = true;
-        //modelRenderer.material = tempMaterial2; // For Testing Primatives
     }
 
     private IEnumerator FadeOut(float fadeTime){
@@ -110,7 +102,6 @@ public class Encounter : MonoBehaviour
 
             model.transform.position = Vector3.Lerp(startPosition, endPosition, (elaspedTime/ fadeTime));
 
-            //model.transform.position -= model.transform.forward * Time.deltaTime * movSpeed;
             elaspedTime += Time.deltaTime;
             yield return null;
         }
