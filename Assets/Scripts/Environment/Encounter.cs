@@ -57,9 +57,9 @@ public class Encounter : MonoBehaviour
     private float GetAngle(){
         _distanceToPlayer = player.transform.position - model.transform.position;
 
-        Vector3 playerToCentre = playerCentre.transform.position - player.transform.position ;
+        Vector3 playerToCentre = playerCentre.transform.position - player.transform.position;
 
-        float angle = Vector3.Angle(_distanceToPlayer, playerToCentre);    
+        float angle = Vector3.Angle(_distanceToPlayer, playerToCentre);
 
         return angle;
     }
