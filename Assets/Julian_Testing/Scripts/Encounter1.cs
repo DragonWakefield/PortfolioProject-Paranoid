@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.VFX;
 
-enum EncounterState
+public enum EncounterState
 {
     Disabled,
+    Ready,
     Enabled,
     Encounter,
-    Finished
 }
 public class Encounter1 : MonoBehaviour
 {
@@ -23,18 +24,25 @@ public class Encounter1 : MonoBehaviour
     private EncounterState state;
 
     private float initialAngle;
+    public float cooldownTimer = 10;
+    private float timer = 0;
 
     private Renderer modelRenderer;
 
+    private Material material;
+    private MeshRenderer mesh;
 
-    [Header("Materials")]
-    public Material tempMaterial1;
-    public Material tempMaterial2;
+    public VisualEffect vfx;
 
+    [Header("Dissolve Properties")]
+    [SerializeField] private float dissolveRate = 0.0125f;
+    [SerializeField] private float refreshRate = 0.025f;
 
     private void Start(){
         modelRenderer = GetComponent<Renderer>();
+        mesh = GetComponent<MeshRenderer>();
         initialAngle = 0;
+        material = mesh.material;
     }
 
     private void Update(){
@@ -42,6 +50,11 @@ public class Encounter1 : MonoBehaviour
         switch (state)
         {
             case EncounterState.Disabled:
+                DoDisableTimer();
+                break;
+                
+            case EncounterState.Ready:
+
                 break;
 
             case EncounterState.Enabled:
@@ -49,15 +62,11 @@ public class Encounter1 : MonoBehaviour
                 if (angle > 40f)
                 {
                     state = EncounterState.Encounter;
-                    modelRenderer.material = tempMaterial2; // Testing Primatives
                 }
                 break;
 
             case EncounterState.Encounter:
                 TrackAndFade();
-                break;
-
-            case EncounterState.Finished:
                 break;
 
         }
@@ -84,38 +93,55 @@ public class Encounter1 : MonoBehaviour
         else{
             float percentage = angle / initialAngle;
 
-            var modelColor = modelRenderer.material.color;
-            modelColor.a = percentage;
-            modelRenderer.material.color = modelColor;
-
             if (percentage < 0.20f){
-                StartCoroutine(FadeOut(4f));
-                Debug.Log("DEBUG");
-                state = EncounterState.Finished;
+                StartCoroutine(Dissolve());
+               
             }
         }
     }
 
     public void ActivateEncounter(){
-
-        if(state == EncounterState.Finished) return;
-        
-        state = EncounterState.Enabled;
-
-    }
-
-    private IEnumerator FadeOut(float fadeTime){
-        Vector3 startPosition = transform.position;
-        Vector3 endPosition = targetPos.position;
-        float elaspedTime = 0;
-
-        while(elaspedTime < fadeTime){
-
-            transform.position = Vector3.Lerp(startPosition, endPosition, (elaspedTime/ fadeTime) * moveSpeed);
-
-            elaspedTime += Time.deltaTime;
-            yield return null;
+        var rngValue = (int)Random.Range(0, 100);
+        Debug.Log(rngValue);
+        if (state == EncounterState.Disabled) return;
+        if(rngValue >= EncounterManager.encounterManagerInstance.GetRng())
+        {
+            state = EncounterState.Enabled;
         }
-        Destroy(gameObject);
+        else
+        {
+            state = EncounterState.Disabled;
+            RefreshTimer();
+        }
+    }
+    void DoDisableTimer()
+    {
+        if (state != EncounterState.Disabled) return;
+        timer += Time.deltaTime;
+        if(timer >= cooldownTimer)
+        {
+            state = EncounterState.Ready;
+        }
+    }
+    IEnumerator Dissolve()
+    {
+        vfx.Play();
+        float counter = 0;
+        while(material.GetFloat("_DissolveAmount") < 1)
+        {
+            counter += dissolveRate;
+            material.SetFloat("_DissolveAmount", counter);
+            yield return new WaitForSeconds(refreshRate);
+        }
+        state = EncounterState.Disabled;
+        RefreshTimer();
+    }
+    public EncounterState GetState()
+    {
+        return state;
+    }
+    private void RefreshTimer()
+    {
+        timer = 0;
     }
 }

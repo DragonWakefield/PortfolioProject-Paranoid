@@ -15,7 +15,9 @@ public class EncounterTrigger1 : MonoBehaviour
             {
                 if (encounter == null)
                     continue;
-
+                Debug.Log(encounter.GetState());
+                if(encounter.GetState() == EncounterState.Ready)
+                 
                 encounter.ActivateEncounter();
             }
         }

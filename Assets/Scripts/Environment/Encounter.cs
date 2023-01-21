@@ -38,7 +38,7 @@ public class Encounter : MonoBehaviour
 
     private void Update(){
         Debug.DrawRay(model.transform.position, model.transform.TransformDirection(Vector3.forward) * 10, Color.green);
-        
+
         if(_activated){
 
             float angle = GetAngle();
@@ -85,12 +85,14 @@ public class Encounter : MonoBehaviour
             }
         }
 
-
     }
 
     public void ActivateEncounter(){
-        Debug.Log("Activated");
-        _activated = true;
+        var rngValue = Random.Range(0, 100);
+        if(rngValue >= EncounterManager.encounterManagerInstance.GetRng())
+        {
+           _activated = true;
+        }
     }
 
     private IEnumerator FadeOut(float fadeTime){
