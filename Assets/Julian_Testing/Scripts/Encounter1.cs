@@ -76,8 +76,8 @@ public class Encounter1 : MonoBehaviour
 
         _distanceToPlayer = transform.position - Camera.main.transform.position;
 
+        //float angle = Vector3.Angle(_distanceToPlayer, Camera.main.transform.forward);
         float angle = Vector3.Angle(_distanceToPlayer, Camera.main.transform.forward);
-
         return angle;
     }
 

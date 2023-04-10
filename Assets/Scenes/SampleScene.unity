@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 5519.842, g: 3840.879, b: 3057.7773, a: 1}
+  m_IndirectSpecularColor: {r: 5526.9053, g: 3846.0352, b: 3059.3828, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -276,9 +276,9 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &570014744 stripped
+--- !u!1 &609576539 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 2308482036407251844, guid: 1610aae6ec43fff4fa3cce1fb791d172, type: 3}
+  m_CorrespondingSourceObject: {fileID: 7998246822170151647, guid: 1610aae6ec43fff4fa3cce1fb791d172, type: 3}
   m_PrefabInstance: {fileID: 1831809718598434034}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &705507993
@@ -356,7 +356,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 4.5904e-41, y: 0, z: 0, w: -0.000017006416}
+  m_BoundingSphereOverride: {x: -1, y: 10, z: 11, w: -12}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
@@ -708,8 +708,7 @@ MonoBehaviour:
   tempMaterial2: {fileID: 2100000, guid: 81b6d6367ad8e034cbaa42cdd70d85b6, type: 2}
   movSpeed: 0
   model: {fileID: 0}
-  player: {fileID: 570014744}
-  playerCentre: {fileID: 0}
+  player: {fileID: 609576539}
   _distanceToPlayer: {x: 0, y: 0, z: 0}
 --- !u!1 &1301247132
 GameObject:
