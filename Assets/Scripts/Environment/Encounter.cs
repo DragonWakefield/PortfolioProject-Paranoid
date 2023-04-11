@@ -16,24 +16,29 @@ public class Encounter : MonoBehaviour
     private GameObject player;
 
     [SerializeField]
-    private GameObject playerCentre;
-
-    [SerializeField]
     private Vector3 _distanceToPlayer;
 
+    private Vector3 initialPosition;
     private bool _activated;
     private float initialAngle;
     private bool startEncounter;
-    
+    private bool fadeIn;
+
+    private float FADE_IN_TIME = 1f;
+    private float FADE_IN_DISTANCE = 2f;
+    private float FADE_OUT_TIME = 4f;
+    private float FADE_OUT_DISTANCE = 5f;
     private void Start(){
         _activated = false;
         movSpeed = 0.5f;
-        playerCentre = GameObject.FindGameObjectWithTag("EyeTracker");
+        player = GameObject.FindGameObjectWithTag("Player");
         model = transform.GetChild(1).GetChild(0).gameObject;
         modelRenderer = model.GetComponent<Renderer>();
         initialAngle = 0;
         startEncounter = false;
-        
+        initialPosition = model.transform.position;
+        fadeIn = false;
+        InitializeNewPosition();
     }
 
     private void Update(){
@@ -50,16 +55,22 @@ public class Encounter : MonoBehaviour
         }
 
         if (startEncounter){
+            if (!fadeIn){
+               StartCoroutine(FadeIn(FADE_IN_TIME)); 
+            }
+            
             TrackAndFade();
         }
     }
 
+    private void InitializeNewPosition(){
+        model.transform.position = model.transform.position - model.transform.forward * FADE_IN_DISTANCE;
+    }
+
     private float GetAngle(){
-        _distanceToPlayer = player.transform.position - model.transform.position;
 
-        Vector3 playerToCentre = playerCentre.transform.position - player.transform.position;
-
-        float angle = Vector3.Angle(_distanceToPlayer, playerToCentre);
+        _distanceToPlayer = Camera.main.transform.position - model.transform.position;
+        float angle = Vector3.Angle(_distanceToPlayer, -Camera.main.transform.forward);
 
         return angle;
     }
@@ -81,23 +92,41 @@ public class Encounter : MonoBehaviour
             modelRenderer.material.color = modelColor;
 
             if (percentage < 0.20f){
-                StartCoroutine(FadeOut(4f));
+                StartCoroutine(FadeOut(FADE_OUT_TIME));
             }
         }
 
     }
 
     public void ActivateEncounter(){
-        var rngValue = Random.Range(0, 100);
-        if(rngValue >= EncounterManager.encounterManagerInstance.GetRng())
-        {
-           _activated = true;
+        // var rngValue = Random.Range(0, 100);
+        // if(rngValue >= EncounterManager.encounterManagerInstance.GetRng())
+        // {
+        //    _activated = true;
+        // }
+
+        _activated = true;
+    }
+
+    private IEnumerator FadeIn(float fadeTime){
+        fadeIn = true;
+        Vector3 startPosition = model.transform.position;
+        Vector3 endPosition = model.transform.position + model.transform.forward * FADE_IN_DISTANCE;
+        float elaspedTime = 0;
+
+        while(elaspedTime < fadeTime){
+
+            model.transform.position = Vector3.Lerp(startPosition, endPosition, (elaspedTime/ fadeTime));
+
+            elaspedTime += Time.deltaTime;
+            yield return null;
         }
+
     }
 
     private IEnumerator FadeOut(float fadeTime){
         Vector3 startPosition = model.transform.position;
-        Vector3 endPosition = model.transform.position - model.transform.forward * 5f;
+        Vector3 endPosition = model.transform.position - model.transform.forward * FADE_OUT_DISTANCE;
         float elaspedTime = 0;
 
         while(elaspedTime < fadeTime){
