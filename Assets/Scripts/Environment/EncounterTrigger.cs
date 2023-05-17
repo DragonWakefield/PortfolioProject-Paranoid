@@ -14,6 +14,7 @@ public class EncounterTrigger : MonoBehaviour
         
         if (other.gameObject.layer == 7){
             encounterScript.ActivateEncounter();
+            Debug.Log("Encounter Triggered");
         }
     }
 }

@@ -16,40 +16,69 @@ public class Encounter : MonoBehaviour
     private GameObject player;
 
     [SerializeField]
-    private GameObject playerCentre;
-
-    [SerializeField]
     private Vector3 _distanceToPlayer;
 
+    private Vector3 initialPosition;
     private bool _activated;
     private float initialAngle;
-    
+    private bool startEncounter;
+    private bool fadeIn;
+
+    private float FADE_IN_TIME = 1f;
+    private float FADE_IN_DISTANCE = 2f;
+    private float FADE_OUT_TIME = 4f;
+    private float FADE_OUT_DISTANCE = 5f;
     private void Start(){
         _activated = false;
-        movSpeed = 2f;
-        playerCentre = GameObject.FindGameObjectWithTag("EyeTracker");
+        movSpeed = 0.5f;
+        player = GameObject.FindGameObjectWithTag("Player");
         model = transform.GetChild(1).GetChild(0).gameObject;
         modelRenderer = model.GetComponent<Renderer>();
         initialAngle = 0;
+        startEncounter = false;
+        initialPosition = model.transform.position;
+        fadeIn = false;
+        InitializeNewPosition();
     }
 
     private void Update(){
+        Debug.DrawRay(model.transform.position, model.transform.TransformDirection(Vector3.forward) * 10, Color.green);
+
         if(_activated){
+
+            float angle = GetAngle();
+            Debug.Log(angle);
+            if (angle > 40f){
+                startEncounter = true;
+                modelRenderer.material = tempMaterial2; // Testing Primatives
+            }
+        }
+
+        if (startEncounter){
+            if (!fadeIn){
+               StartCoroutine(FadeIn(FADE_IN_TIME)); 
+            }
+            
             TrackAndFade();
         }
+    }
+
+    private void InitializeNewPosition(){
+        model.transform.position = model.transform.position - model.transform.forward * FADE_IN_DISTANCE;
+    }
+
+    private float GetAngle(){
+
+        _distanceToPlayer = Camera.main.transform.position - model.transform.position;
+        float angle = Vector3.Angle(_distanceToPlayer, -Camera.main.transform.forward);
+
+        return angle;
     }
 
     private void TrackAndFade(){
 
         /* Track */
-        Debug.DrawLine(model.transform.position, player.transform.position, Color.green);
-        _distanceToPlayer = player.transform.position - model.transform.position;
-
-        Vector3 playerToCentre = playerCentre.transform.position - player.transform.position ;
-
-        float angle = Vector3.Angle(_distanceToPlayer, playerToCentre);
-
-        //Debug.Log(angle);
+        float angle = GetAngle();
 
         /* Fade */
         if (initialAngle == 0){
@@ -57,35 +86,58 @@ public class Encounter : MonoBehaviour
         }
         else{
             float percentage = angle / initialAngle;
-            Debug.Log(percentage);
+
             var modelColor = modelRenderer.material.color;
             modelColor.a = percentage;
             modelRenderer.material.color = modelColor;
 
             if (percentage < 0.20f){
-                StartCoroutine(FadeOut(1f));
+                StartCoroutine(FadeOut(FADE_OUT_TIME));
             }
         }
-
 
     }
 
     public void ActivateEncounter(){
-        Debug.Log("Activated");
+        // var rngValue = Random.Range(0, 100);
+        // if(rngValue >= EncounterManager.encounterManagerInstance.GetRng())
+        // {
+        //    _activated = true;
+        // }
+
         _activated = true;
-        modelRenderer.material = tempMaterial2;
+    }
+
+    private IEnumerator FadeIn(float fadeTime){
+        fadeIn = true;
+        Vector3 startPosition = model.transform.position;
+        Vector3 endPosition = model.transform.position + model.transform.forward * FADE_IN_DISTANCE;
+        float elaspedTime = 0;
+
+        while(elaspedTime < fadeTime){
+
+            model.transform.position = Vector3.Lerp(startPosition, endPosition, (elaspedTime/ fadeTime));
+
+            elaspedTime += Time.deltaTime;
+            yield return null;
+        }
+
     }
 
     private IEnumerator FadeOut(float fadeTime){
         Vector3 startPosition = model.transform.position;
+        Vector3 endPosition = model.transform.position - model.transform.forward * FADE_OUT_DISTANCE;
         float elaspedTime = 0;
 
         while(elaspedTime < fadeTime){
-            model.transform.position -= Vector3.forward * Time.deltaTime * movSpeed;
+
+            model.transform.position = Vector3.Lerp(startPosition, endPosition, (elaspedTime/ fadeTime));
+
             elaspedTime += Time.deltaTime;
+            yield return null;
         }
 
         Destroy(gameObject);
-        yield return null;
+        
     }
 }
